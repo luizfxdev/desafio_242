@@ -54,11 +54,6 @@ Efeitos de glassmorphism nos containers
 Animações de pulsação e brilho em tempo real
 Transformações 3D nos botões com feedback visual
 
-🎬 Background Customizável
-
-Suporte a vídeo MP4 como background
-Fallback para gradiente se o vídeo não carregar
-Overlay ajustável para legibilidade do texto
 
 🎮 Interatividade
 
