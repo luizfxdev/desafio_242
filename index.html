@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reino dos JSONs - Aventura Mágica</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Roboto+Mono:wght@300;400;500&display=swap');
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Cinzel', serif;
+        background: url('/images/background.png') center/cover no-repeat,
+          linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+        min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      .stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .star {
+        position: absolute;
+        background: #fff;
+        border-radius: 50%;
+        animation: twinkle 3s infinite;
+      }
+
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 0.3;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.2);
+        }
+      }
+
+      .floating-particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: linear-gradient(45deg, #ffd700, #ffec8b);
+        border-radius: 50%;
+        animation: float 8s infinite ease-in-out;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-100vh) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      .container {
+        position: relative;
+        z-index: 10;
+        max-width: 700px;
+        margin-left: 5%;
+        padding: 40px;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(20px);
+        border: 2px solid rgba(255, 215, 0, 0.3);
+        border-radius: 20px;
+        box-shadow: 0 0 50px rgba(255, 215, 0, 0.2), inset 0 0 50px rgba(255, 215, 0, 0.1);
+        margin-top: 10vh;
+        animation: containerGlow 4s ease-in-out infinite alternate;
+      }
+
+      @keyframes containerGlow {
+        0% {
+          box-shadow: 0 0 50px rgba(255, 215, 0, 0.2), inset 0 0 50px rgba(255, 215, 0, 0.1);
+        }
+        100% {
+          box-shadow: 0 0 80px rgba(255, 215, 0, 0.4), inset 0 0 50px rgba(255, 215, 0, 0.2);
+        }
+      }
+
+      .title {
+        text-align: center;
+        color: #ffd700;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        animation: titlePulse 3s ease-in-out infinite;
+      }
+
+      @keyframes titlePulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #87ceeb;
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+        opacity: 0.9;
+      }
+
+      .story {
+        color: #e6e6fa;
+        line-height: 1.6;
+        margin-bottom: 30px;
+        font-size: 1rem;
+        text-align: justify;
+      }
+
+      .json-display {
+        background: rgba(20, 20, 40, 0.9);
+        border: 1px solid rgba(135, 206, 235, 0.3);
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 0.9rem;
+        color: #87ceeb;
+        overflow-x: auto;
+        position: relative;
+        animation: jsonGlow 2s ease-in-out infinite alternate;
+      }
+
+      @keyframes jsonGlow {
+        0% {
+          border-color: rgba(135, 206, 235, 0.3);
+        }
+        100% {
+          border-color: rgba(135, 206, 235, 0.6);
+        }
+      }
+
+      .path-display {
+        background: rgba(40, 20, 60, 0.9);
+        border: 1px solid rgba(255, 20, 147, 0.4);
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+        font-family: 'Roboto Mono', monospace;
+        color: #ff69b4;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        animation: pathGlow 2s ease-in-out infinite alternate;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        line-height: 1.4;
+      }
+
+      @keyframes pathGlow {
+        0% {
+          border-color: rgba(255, 20, 147, 0.4);
+        }
+        100% {
+          border-color: rgba(255, 20, 147, 0.7);
+        }
+      }
+
+      .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .magical-button {
+        background: linear-gradient(45deg, #4a00e0, #8e2de2);
+        border: none;
+        padding: 15px 30px;
+        border-radius: 50px;
+        color: white;
+        font-family: 'Cinzel', serif;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        transform: perspective(1000px) rotateX(0deg);
+      }
+
+      .magical-button:hover {
+        transform: perspective(1000px) rotateX(-10deg) scale(1.05);
+        box-shadow: 0 20px 40px rgba(138, 45, 226, 0.4);
+      }
+
+      .magical-button:active {
+        transform: perspective(1000px) rotateX(5deg) scale(0.98);
+      }
+
+      .magical-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+      }
+
+      .magical-button:hover::before {
+        left: 100%;
+      }
+
+      .solve-button {
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        animation: solvePulse 2s ease-in-out infinite;
+      }
+
+      @keyframes solvePulse {
+        0%,
+        100% {
+          box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 40px rgba(255, 107, 107, 0.8);
+        }
+      }
+
+      .reset-button {
+        background: linear-gradient(45deg, #74b9ff, #0984e3);
+      }
+
+      .result {
+        margin-top: 20px;
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: 600;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      .result.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .success {
+        background: linear-gradient(45deg, rgba(0, 255, 127, 0.2), rgba(50, 205, 50, 0.2));
+        border: 2px solid rgba(0, 255, 127, 0.6);
+        color: #00ff7f;
+        animation: successGlow 1.5s ease-in-out infinite alternate;
+      }
+
+      @keyframes successGlow {
+        0% {
+          box-shadow: 0 0 20px rgba(0, 255, 127, 0.4);
+        }
+        100% {
+          box-shadow: 0 0 40px rgba(0, 255, 127, 0.8);
+        }
+      }
+
+      .step-indicator {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 20px 0;
+      }
+
+      .step {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .step.active {
+        background: #ffd700;
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+        transform: scale(1.3);
+      }
+
+      .wizard {
+        position: absolute;
+        right: 10%;
+        top: 20%;
+        font-size: 6rem;
+        animation: wizardFloat 4s ease-in-out infinite;
+        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6));
+      }
+
+      @keyframes wizardFloat {
+        0%,
+        100% {
+          transform: translateY(0) rotate(-5deg);
+        }
+        50% {
+          transform: translateY(-20px) rotate(5deg);
+        }
+      }
+
+      .castle {
+        position: absolute;
+        right: 5%;
+        bottom: 10%;
+        font-size: 8rem;
+        opacity: 0.7;
+        animation: castleGlow 3s ease-in-out infinite alternate;
+      }
+
+      @keyframes castleGlow {
+        0% {
+          filter: drop-shadow(0 0 10px rgba(135, 206, 235, 0.4));
+        }
+        100% {
+          filter: drop-shadow(0 0 30px rgba(135, 206, 235, 0.8));
+        }
+      }
+
+      .typing-animation {
+        overflow: hidden;
+        white-space: nowrap;
+        border-right: 2px solid #ffd700;
+        animation: typing 3s steps(30, end), blink 1s infinite step-end alternate;
+      }
+
+      @keyframes typing {
+        from {
+          width: 0;
+        }
+        to {
+          width: 100%;
+        }
+      }
+
+      @keyframes blink {
+        50% {
+          border-color: transparent;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          margin: 20px;
+          max-width: calc(100vw - 40px);
+          margin-left: 20px;
+          padding: 20px;
+        }
+
+        .title {
+          font-size: 2rem;
+        }
+
+        .wizard,
+        .castle {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stars"></div>
+    <div class="floating-particles"></div>
+
+    <div class="wizard">🧙‍♂️</div>
+    <div class="castle">🏰</div>
+
+    <div class="container">
+      <h1 class="title">Reino dos JSONs</h1>
+      <p class="subtitle">🔮 Aventura Mágica Interativa 🔮</p>
+
+      <div class="story">
+        Bem-vindo, bravo programador! O Reino dos JSONs precisa de sua ajuda! Um mago poderoso encantou os dados e
+        apenas aquele com o coração puro e habilidades de JavaScript conseguirá desfazer a magia!
+      </div>
+
+      <div class="step-indicator">
+        <div class="step active"></div>
+        <div class="step"></div>
+        <div class="step"></div>
+        <div class="step"></div>
+      </div>
+
+      <div class="json-display" id="jsonDisplay">
+        <div class="typing-animation" id="jsonContent">Carregando o JSON encantado...</div>
+      </div>
+
+      <div class="path-display" id="pathDisplay">🗝️ Caminho mágico aparecerá aqui...</div>
+
+      <div class="action-buttons">
+        <button class="magical-button solve-button" id="solveButton">⚡ Desvendar o Mistério ⚡</button>
+        <button class="magical-button reset-button" id="resetButton">🔄 Nova Aventura</button>
+      </div>
+
+      <div class="result" id="result"></div>
+    </div>
+
+    <script>
+      // JSON encantado do desafio
+      const enchantedJSON = {
+        portal: {
+          camada: [
+            null,
+            {
+              mistério: [
+                'perdido',
+                {
+                  pista: 'continue procurando',
+                  chave: {
+                    caixa: [
+                      'não aqui',
+                      {
+                        deep: 'mais profundo',
+                        segredo: 'Eureka! Você encontrou!'
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            'confuso'
+          ]
+        }
+      };
+
+      // Elementos do DOM
+      const jsonDisplay = document.getElementById('jsonDisplay');
+      const jsonContent = document.getElementById('jsonContent');
+      const pathDisplay = document.getElementById('pathDisplay');
+      const solveButton = document.getElementById('solveButton');
+      const resetButton = document.getElementById('resetButton');
+      const result = document.getElementById('result');
+      const steps = document.querySelectorAll('.step');
+
+      let currentStep = 0;
+
+      // Criar estrelas animadas
+      function createStars() {
+        const starsContainer = document.querySelector('.stars');
+        for (let i = 0; i < 100; i++) {
+          const star = document.createElement('div');
+          star.className = 'star';
+          star.style.left = Math.random() * 100 + 'vw';
+          star.style.top = Math.random() * 100 + 'vh';
+          star.style.width = Math.random() * 3 + 1 + 'px';
+          star.style.height = star.style.width;
+          star.style.animationDelay = Math.random() * 3 + 's';
+          starsContainer.appendChild(star);
+        }
+      }
+
+      // Criar partículas flutuantes
+      function createParticles() {
+        const particlesContainer = document.querySelector('.floating-particles');
+        setInterval(() => {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.style.left = Math.random() * 100 + 'vw';
+          particle.style.animationDuration = Math.random() * 3 + 5 + 's';
+          particlesContainer.appendChild(particle);
+
+          setTimeout(() => {
+            particle.remove();
+          }, 8000);
+        }, 1000);
+      }
+
+      // Atualizar indicador de passos
+      function updateSteps(step) {
+        steps.forEach((s, index) => {
+          s.classList.toggle('active', index <= step);
+        });
+      }
+
+      // Mostrar JSON com animação de digitação
+      function showJSON() {
+        const jsonString = JSON.stringify(enchantedJSON, null, 2);
+        jsonContent.className = '';
+        jsonContent.textContent = '';
+
+        let i = 0;
+        const typeWriter = () => {
+          if (i < jsonString.length) {
+            jsonContent.textContent += jsonString.charAt(i);
+            i++;
+            setTimeout(typeWriter, 20);
+          } else {
+            currentStep = 1;
+            updateSteps(currentStep);
+          }
+        };
+        typeWriter();
+      }
+
+      // Resolver o enigma (agora também mostra o caminho)
+      function solveEnigma() {
+        // Primeiro mostrar o caminho secreto
+        const path = 'json.portal.camada[1].mistério[1].chave.caixa[1].segredo';
+        pathDisplay.innerHTML = `
+                <div style="width: 100%;">
+                    <div style="color: #ffd700; margin-bottom: 8px;">🗝️ Caminho Secreto:</div>
+                    <code style="color: #ff69b4; font-size: 0.9rem; word-break: break-all;">${path}</code>
+                </div>
+            `;
+        currentStep = 2;
+        updateSteps(currentStep);
+
+        // Aguardar um pouco e então executar o caminho para extrair o valor
+        setTimeout(() => {
+          const secretValue = enchantedJSON.portal.camada[1].mistério[1].chave.caixa[1].segredo;
+
+          result.className = 'result success show';
+          result.innerHTML = `
+                    <div>
+                        <div style="font-size: 2rem; margin-bottom: 10px;">🎉✨</div>
+                        <div style="font-size: 1.5rem; margin-bottom: 10px;">${secretValue}</div>
+                        <div style="font-size: 1rem; opacity: 0.8;">Parabéns! Você desbloqueou o mistério do Reino dos JSONs!</div>
+                    </div>
+                `;
+
+          currentStep = 3;
+          updateSteps(currentStep);
+
+          // Adicionar mais partículas de celebração
+          for (let i = 0; i < 20; i++) {
+            setTimeout(() => {
+              const particle = document.createElement('div');
+              particle.className = 'particle';
+              particle.style.left = Math.random() * 100 + 'vw';
+              particle.style.background = 'linear-gradient(45deg, #ff6b6b, #ffd700, #00ff7f)';
+              particle.style.animationDuration = '3s';
+              document.querySelector('.floating-particles').appendChild(particle);
+
+              setTimeout(() => particle.remove(), 3000);
+            }, i * 100);
+          }
+        }, 1500); // Aguarda 1.5 segundos antes de mostrar o resultado
+      }
+
+      // Resetar aventura
+      function resetAdventure() {
+        jsonContent.className = 'typing-animation';
+        jsonContent.textContent = 'Carregando o JSON encantado...';
+        pathDisplay.innerHTML = `
+                <div style="width: 100%; text-align: center;">
+                    🗝️ Caminho mágico aparecerá aqui...
+                </div>
+            `;
+        result.className = 'result';
+        result.textContent = '';
+        currentStep = 0;
+        updateSteps(currentStep);
+
+        setTimeout(showJSON, 1000);
+      }
+
+      // Event listeners
+      solveButton.addEventListener('click', () => {
+        solveButton.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          solveButton.style.transform = '';
+          solveEnigma();
+        }, 150);
+      });
+
+      resetButton.addEventListener('click', () => {
+        resetButton.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          resetButton.style.transform = '';
+          resetAdventure();
+        }, 150);
+      });
+
+      // Inicializar a experiência
+      function init() {
+        createStars();
+        createParticles();
+        setTimeout(showJSON, 2000);
+      }
+
+      // Iniciar quando a página carregar
+      window.addEventListener('load', init);
+
+      // Adicionar efeitos de som simulados com vibração (se suportado)
+      function playHapticFeedback() {
+        if (navigator.vibrate) {
+          navigator.vibrate([100, 30, 100]);
+        }
+      }
+
+      // Adicionar feedback háptico aos botões
+      document.querySelectorAll('.magical-button').forEach(button => {
+        button.addEventListener('click', playHapticFeedback);
+      });
+    </script>
+  </body>
+</html>
